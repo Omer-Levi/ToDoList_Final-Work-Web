@@ -18,21 +18,24 @@
         <h3>Register Here</h3>
 
         <label for="Email">Email</label>
-        <input type="email" placeholder="Email" id="email">
+        <input type="email" placeholder="Email" id="email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" required>
 
         <label for="password">Password</label>
-        <input type="password" placeholder="Password" id="password">
+        <input type="password" placeholder="Password" id="password" pattern="(.{8,}$)" required>
 
         <label for="repeatPassword">Repeat Password</label>
-        <input type="password" placeholder="Repeat Password" id="repeatPassword">
+        <input type="password" placeholder="Repeat Password" id="repeatPassword" pattern="(.{8,}$)" required>
 
         <label for="username">User Name</label>
-        <input type="text" placeholder="username" id="userName">
+        <input type="text" placeholder="username" id="userame" required>
 
-        <button>Register</button>
-        <div class="social">
+        <div id="message">
+            <p id="length" class="invalid">Minimum <b>8 characters</b></p>
+          </div>
 
-        </div>
+        <button class="formBtn" type="submit" name="submit" id="submit">Register</button>
+
     </form>
 </body>
+<script src="registarApp.js"></script>
 </html>
