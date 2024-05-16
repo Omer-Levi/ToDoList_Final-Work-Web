@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>To Do List With Local Storage</title>
@@ -10,9 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet" />
     <!-- Stylesheet -->
     <link rel="stylesheet" type="text/css" href="styleToDos.css">
-
 </head>
-
 <body>
     <div class="background">
         <div class="shape"></div>
@@ -28,11 +25,114 @@
             <!-- INNERHTML -->
         </div>
     </div>
-    <div class="downbut" >
-        <button class="button-17" role="button">Save</button> <button class="button-17" role="button">Log Out</button>
+    <div class="downbut">
+        <button class="button-17" id="saveBtn" role="button">Save</button> 
+        <button class="button-17" id="logoutBtn" role="button">Log Out</button>
     </div>
     <!-- Script -->
-    <script src="appToDos.js"></script>
-</body>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'loginUser.html';
+                return;
+            }
 
+            try {
+                const response = await fetch('/todos', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const todos = await response.json();
+                    // Display todos
+                    const lists = document.querySelector('[data-lists]');
+                    lists.innerHTML = todos.map(todo => `
+                        <div class="todo">
+                            <p>${todo.task}</p>
+                            <span class="remove" data-id="${todo._id}">🗑️</span>
+                        </div>
+                    `).join('');
+                } else {
+                    const message = await response.text();
+                    console.log('Error fetching todos:', message);
+                    alert(message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+            }
+
+            document.querySelector('form[data-form]').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const input = document.querySelector('input[data-input]');
+                const lists = document.querySelector('[data-lists]');
+                const newTodo = `
+                    <div class="todo">
+                        <p>${input.value}</p>
+                        <span class="remove">🗑️</span>
+                    </div>
+                `;
+                lists.innerHTML += newTodo;
+                input.value = '';
+            });
+
+            document.querySelector('[data-lists]').addEventListener('click', async (e) => {
+                if (e.target.classList.contains('remove')) {
+                    const id = e.target.getAttribute('data-id');
+                    try {
+                        const response = await fetch(`/todos/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        if (response.ok) {
+                            e.target.parentElement.remove();
+                        } else {
+                            const message = await response.text();
+                            console.log('Error deleting todo:', message);
+                            alert(message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again later.');
+                    }
+                }
+            });
+
+            document.getElementById('saveBtn').addEventListener('click', async () => {
+                const todos = Array.from(document.querySelectorAll('.todo p')).map(p => p.textContent);
+                try {
+                    const response = await fetch('/todos', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ todos })
+                    });
+
+                    if (!response.ok) {
+                        const message = await response.text();
+                        console.log('Error saving todos:', message);
+                        alert(message);
+                    } else {
+                        alert('Todos saved successfully!');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again later.');
+                }
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                sessionStorage.removeItem('token');
+                window.location.href = 'loginUser.html';
+            });
+        });
+    </script>
+</body>
 </html>

@@ -14,7 +14,7 @@
         <div class="shape"></div>
         <div class="shape"></div>
     </div>
-    <form action="todos.html">
+    <form id="loginForm">
         <h3>Login Here</h3>
 
         <label for="email">Email</label>
@@ -27,4 +27,33 @@
 
     </form>
 </body>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (response.ok) {
+                const { token } = await response.json();
+                sessionStorage.setItem('token', token);
+                window.location.href = 'todos.html';
+            } else {
+                const message = await response.text();
+                alert(message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again later.');
+        }
+    });
+</script>
 </html>
